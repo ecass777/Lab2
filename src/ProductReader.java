@@ -1,47 +1,31 @@
-import javax.swing.*;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Scanner;
+import java.nio.file.*;
+import java.util.ArrayList;
 
 public class ProductReader {
     public static void main(String[] args) {
-        JFileChooser chooser = new JFileChooser();
-        File selectedFile;
-        String rec = "";
-
+        ArrayList<Product> products = new ArrayList<>();
         try {
-            // Set working directory to the current directory of the project
-            File workingDirectory = new File(System.getProperty("user.dir"));
-            chooser.setCurrentDirectory(workingDirectory);
-
-            // Open file chooser dialog
-            if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-                selectedFile = chooser.getSelectedFile();
-                Path file = selectedFile.toPath();
-
-                // Open file for reading
-                InputStream in = new BufferedInputStream(Files.newInputStream(file));
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                System.out.println("        ID#     Name    Description       Cost");
-                System.out.println("=====================================================");
-                // Read file line by line
-                int line = 0;
-                while ((rec = reader.readLine()) != null) {
-                    line++;
-                    // Print the line to console
-                    System.out.printf("\n %4d: %-60s", line, rec);
+            Path file = Paths.get("ProductData.csv");
+            BufferedReader reader = Files.newBufferedReader(file);
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] data = line.split(",");
+                if (data.length == 4) {
+                    String ID = data[0];
+                    String name = data[1];
+                    String description = data[2];
+                    double cost = Double.parseDouble(data[3]);
+                    products.add(new Product(name, description, ID, cost));
                 }
-                reader.close(); // Close the file after reading
-                System.out.println("\n\nData file read!");
             }
-        } catch (FileNotFoundException e) {
-            System.out.println("File not found!!!");
-            e.printStackTrace();
+            reader.close();
         } catch (IOException e) {
-            System.out.println("Error reading file!");
-            e.printStackTrace();
+            System.err.println("Error reading file: " + e.getMessage());
+        }
+
+        for (Product p : products) {
+            System.out.println(p);
         }
     }
 }
